@@ -6,6 +6,58 @@ Parameters:
     Description: 'The S3 bucket for CodePipeline artifacts.'
 
 Resources:
+  # IAM Role for CloudFormation
+  CloudFormationExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudFormationS3Policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:CreateBucket
+                  - s3:PutBucketPolicy
+                  - s3:PutBucketPublicAccessBlock
+                  - s3:PutEncryptionConfiguration
+                  - s3:PutBucketTagging
+                  - s3:PutBucketAcl
+                  - s3:DeleteBucket
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucketMultipartUploads
+                  - s3:ListMultipartUploadParts
+                  - s3:AbortMultipartUpload
+                  - iam:CreateRole
+                  - iam:PutRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:PassRole
+                  - iam:DeleteRole
+                  - iam:DetachRolePolicy
+                  - iam:DeleteRolePolicy
+                  - cloudformation:CreateStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:GetTemplate
+                  - cloudformation:ValidateTemplate
+                Resource: "*"
+
+  # S3 Bucket for CodePipeline
   CodePipelineS3Bucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
@@ -20,3 +72,8 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+
+Outputs:
+  CloudFormationExecutionRoleArn:
+    Description: "ARN of the CloudFormation Execution Role"
+    Value: !GetAtt CloudFormationExecutionRole.Arn
